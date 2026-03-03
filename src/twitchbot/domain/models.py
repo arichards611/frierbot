@@ -5,9 +5,9 @@ from dataclasses import dataclass, field
 class IrcMessage:
     """A parsed IRC message from Twitch. This is the format that Twitch sends messages in, and is used for parsing incoming messages from Twitch."""
     
+    command: str
     tags: dict[str, str] = field(default_factory=dict)
     prefix: str | None = None
-    command: str
     params: list[str] = field(default_factory=list)
     trailing_message: str | None = None
     
