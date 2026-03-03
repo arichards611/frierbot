@@ -12,7 +12,6 @@ class IrcMessage:
     prefix: str | None = None
     params: list[str] = field(default_factory=list)
     trailing_message: str | None = None
-
     @property
     def nick(self) -> str | None:
         """The nickname of the user who sent the message, if available."""
@@ -34,7 +33,6 @@ class IrcMessage:
             message=self.trailing_message or '',
             raw=self
         )
-
 def _parse_badges_to_roles(badges: str) -> set[str]:
     """Extract role names from a Twitch badges tag value (e.g. 'moderator/1,subscriber/0')."""
     roles = set()
