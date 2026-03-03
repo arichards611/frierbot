@@ -23,7 +23,7 @@ class IrcMessage:
         if self.command != 'PRIVMSG' or not self.params:
             return None
         
-        roles=self._parse_badges_to_roles(self.tags.get('badges', ''))
+        roles = _parse_badges_to_roles(self.tags.get('badges', ''))
 
         return TwitchChatMessage(
             roles=roles,
