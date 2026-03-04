@@ -1,28 +1,29 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 
 @dataclass(frozen=True, slots=True)
 class IrcMessage:
-    """A parsed IRC message from Twitch. This is the format that Twitch sends messages in, and is used for parsing incoming messages from Twitch."""
-    
+    """A parsed IRC message from Twitch."""
+
     command: str
     tags: dict[str, str] = field(default_factory=dict)
     prefix: str | None = None
     params: list[str] = field(default_factory=list)
     trailing_message: str | None = None
-    
     @property
     def nick(self) -> str | None:
         """The nickname of the user who sent the message, if available."""
         if self.prefix is None:
             return None
         return self.prefix.split('!',1)[0]
-    
+
     def to_chat_message(self) -> TwitchChatMessage | None:
-        """Convert this IrcMessage to a TwitchChatMessage, which is the format that the bot will use for processing chat messages."""
+        """Convert this IrcMessage to a TwitchChatMessage, if it's a PRIVMSG."""
         if self.command != 'PRIVMSG' or not self.params:
             return None
-        
+
         roles = _parse_badges_to_roles(self.tags.get('badges', ''))
 
         return TwitchChatMessage(
@@ -32,7 +33,6 @@ class IrcMessage:
             message=self.trailing_message or '',
             raw=self
         )
-    
 def _parse_badges_to_roles(badges: str) -> set[str]:
     """Extract role names from a Twitch badges tag value (e.g. 'moderator/1,subscriber/0')."""
     roles = set()
@@ -44,8 +44,8 @@ def _parse_badges_to_roles(badges: str) -> set[str]:
 
 @dataclass(frozen=True, slots=True)
 class TwitchChatMessage:
-    """A Twitch chat message, parsed from an IrcMessage. This is the format that the bot will use for processing chat messages."""
-    
+    """A normalized Twitch chat message, parsed from an IrcMessage."""
+
     channel: str
     user: str
     message: str
@@ -54,15 +54,15 @@ class TwitchChatMessage:
 
 @dataclass(frozen=True, slots=True)
 class OutgoingMessage:
-    """A message to be sent to Twitch. This is the format that the bot will use for sending messages to Twitch."""
-    
+    """A message to be sent to a Twitch channel."""
+
     channel: str
     text: str
 
 @dataclass(frozen=True, slots=True)
 class TwitchCommand:
-    """A command that the bot can execute. This is the format that the bot will use for processing commands."""
-    
+    """Parsed command context passed to a handler."""
+
     message: TwitchChatMessage
     command: str
     args: list[str] = field(default_factory=list)
